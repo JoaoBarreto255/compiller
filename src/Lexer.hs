@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-missing-signatures #-}
 {-# LANGUAGE CPP #-}
-{-# LINE 1 "Lexer.x" #-}
+{-# LINE 1 "src/Lexer.x" #-}
 
 module Lexer(
 	Token(...),
@@ -7644,7 +7644,6 @@ alex_action_19 = \s -> TokenLBrace
 alex_action_20 = \s -> TokenRBrace
 alex_action_21 = \s -> TokenLBracket
 alex_action_22 = \s -> TokenRBracket
-alex_action_23 = \s -> TokenNewline
 alex_action_24 = \s -> TokenComma
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------

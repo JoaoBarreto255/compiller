@@ -70,6 +70,6 @@ tokens :-
 	\}							{\s -> TokenRBrace}
 	\[							{\s -> TokenLBracket}
 	\]							{\s -> TokenRBracket}
-	\r?\n 						{\s -> TokenNewline}
+	\r?\n 						; -- {\s -> TokenNewline}
 	\, 							{\s -> TokenComma}
 
