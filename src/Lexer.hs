@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-missing-signatures #-}
 {-# LANGUAGE CPP #-}
-{-# LINE 1 "src/Lexer.x" #-}
+{-# LINE 1 "Lexer.x" #-}
 
 module Lexer(
 	Token(...),
@@ -31,6 +31,7 @@ module Lexer(
 	  | TokenRBracket
 	  | TokenEOF
 	  | TokenNewline
+	  | TokenComma
 	  deriving (Eq, Show)
 	
 	scanTokens :: String -> [Token]
@@ -482,7 +483,7 @@ alexGetByte (_,[],(c:s)) = case utf8Encode' c of
 alex_tab_size :: Int
 alex_tab_size = 8
 alex_base :: Array Int Int
-alex_base = listArray (0 :: Int, 62)
+alex_base = listArray (0 :: Int, 63)
   [ -8
   , 8
   , -55
@@ -510,7 +511,7 @@ alex_base = listArray (0 :: Int, 62)
   , 1505
   , 1441
   , 0
-  , 4
+  , 1251
   , 1687
   , 1933
   , 1650
@@ -521,7 +522,7 @@ alex_base = listArray (0 :: Int, 62)
   , 0
   , -30
   , 0
-  , -42
+  , -48
   , 0
   , 0
   , 2291
@@ -538,8 +539,9 @@ alex_base = listArray (0 :: Int, 62)
   , 3116
   , 3191
   , 70
-  , 1214
-  , -94
+  , 1219
+  , -102
+  , 0
   , 0
   , 0
   , 0
@@ -563,16 +565,16 @@ alex_table = listArray (0 :: Int, 3446)
   , 7
   , 56
   , 20
-  , 27
-  , 27
-  , 27
-  , 27
-  , 27
-  , -1
   , 39
-  , 0
-  , 0
   , 56
+  , 0
+  , 0
+  , 0
+  , -1
+  , 0
+  , 0
+  , 0
+  , 0
   , 0
   , 27
   , 2
@@ -586,7 +588,7 @@ alex_table = listArray (0 :: Int, 3446)
   , 58
   , 37
   , 34
-  , 27
+  , 63
   , 35
   , 0
   , 36
@@ -1810,6 +1812,11 @@ alex_table = listArray (0 :: Int, 3446)
   , -1
   , -1
   , -1
+  , 27
+  , 27
+  , 27
+  , 27
+  , 27
   , 12
   , 0
   , 54
@@ -1828,12 +1835,7 @@ alex_table = listArray (0 :: Int, 3446)
   , 0
   , 0
   , 0
-  , 0
-  , 0
-  , 0
-  , 0
-  , 0
-  , 0
+  , 27
   , 0
   , 0
   , 0
@@ -4014,16 +4016,16 @@ alex_check = listArray (0 :: Int, 3446)
   , 100
   , 116
   , 42
-  , 9
-  , 10
-  , 11
-  , 12
-  , 13
-  , 10
   , 61
-  , -1
-  , -1
   , 116
+  , -1
+  , -1
+  , -1
+  , 10
+  , -1
+  , -1
+  , -1
+  , -1
   , -1
   , 32
   , 33
@@ -4037,7 +4039,7 @@ alex_check = listArray (0 :: Int, 3446)
   , 41
   , 42
   , 43
-  , 32
+  , 44
   , 45
   , -1
   , 47
@@ -5261,6 +5263,11 @@ alex_check = listArray (0 :: Int, 3446)
   , 254
   , 255
   , 10
+  , 9
+  , 10
+  , 11
+  , 12
+  , 13
   , 46
   , -1
   , 48
@@ -5279,12 +5286,7 @@ alex_check = listArray (0 :: Int, 3446)
   , -1
   , -1
   , -1
-  , -1
-  , -1
-  , -1
-  , -1
-  , -1
-  , -1
+  , 32
   , -1
   , -1
   , -1
@@ -7451,7 +7453,7 @@ alex_check = listArray (0 :: Int, 3446)
   ]
 
 alex_deflt :: Array Int Int
-alex_deflt = listArray (0 :: Int, 62)
+alex_deflt = listArray (0 :: Int, 63)
   [ -1
   , 20
   , -1
@@ -7515,9 +7517,10 @@ alex_deflt = listArray (0 :: Int, 62)
   , -1
   , -1
   , -1
+  , -1
   ]
 
-alex_accept = listArray (0 :: Int, 62)
+alex_accept = listArray (0 :: Int, 63)
   [ AlexAccNone
   , AlexAccNone
   , AlexAccNone
@@ -7548,6 +7551,7 @@ alex_accept = listArray (0 :: Int, 62)
   , AlexAccSkip
   , AlexAccSkip
   , AlexAccSkip
+  , AlexAcc 33
   , AlexAcc 32
   , AlexAcc 31
   , AlexAcc 30
@@ -7583,18 +7587,19 @@ alex_accept = listArray (0 :: Int, 62)
   , AlexAcc 0
   ]
 
-alex_actions = array (0 :: Int, 33)
-  [ (32,alex_action_3)
-  , (31,alex_action_4)
-  , (30,alex_action_5)
-  , (29,alex_action_6)
-  , (28,alex_action_7)
-  , (27,alex_action_8)
-  , (26,alex_action_9)
-  , (25,alex_action_10)
-  , (24,alex_action_11)
-  , (23,alex_action_12)
-  , (22,alex_action_13)
+alex_actions = array (0 :: Int, 34)
+  [ (33,alex_action_3)
+  , (32,alex_action_4)
+  , (31,alex_action_5)
+  , (30,alex_action_6)
+  , (29,alex_action_7)
+  , (28,alex_action_8)
+  , (27,alex_action_9)
+  , (26,alex_action_10)
+  , (25,alex_action_11)
+  , (24,alex_action_12)
+  , (23,alex_action_13)
+  , (22,alex_action_14)
   , (21,alex_action_14)
   , (20,alex_action_14)
   , (19,alex_action_14)
@@ -7607,16 +7612,16 @@ alex_actions = array (0 :: Int, 33)
   , (12,alex_action_14)
   , (11,alex_action_14)
   , (10,alex_action_14)
-  , (9,alex_action_14)
+  , (9,alex_action_15)
   , (8,alex_action_15)
-  , (7,alex_action_15)
-  , (6,alex_action_16)
-  , (5,alex_action_17)
-  , (4,alex_action_18)
-  , (3,alex_action_19)
-  , (2,alex_action_20)
-  , (1,alex_action_21)
-  , (0,alex_action_22)
+  , (7,alex_action_16)
+  , (6,alex_action_17)
+  , (5,alex_action_18)
+  , (4,alex_action_19)
+  , (3,alex_action_20)
+  , (2,alex_action_21)
+  , (1,alex_action_22)
+  , (0,alex_action_24)
   ]
 
 alex_action_3 = \s -> TokenFn
@@ -7640,6 +7645,7 @@ alex_action_20 = \s -> TokenRBrace
 alex_action_21 = \s -> TokenLBracket
 alex_action_22 = \s -> TokenRBracket
 alex_action_23 = \s -> TokenNewline
+alex_action_24 = \s -> TokenComma
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE
