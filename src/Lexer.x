@@ -16,7 +16,11 @@ module Lexer(
 	  | TokenDiv
 	  | TokenEqual
 	  | TokenEquals
-	  | TokenDiff
+      | TokenDiff
+      | TokenGt
+      | TokenGtEq
+      | TokenLess
+      | TokenLessEq
 	  | TokenSymbol String
 	  | TokenInt Int
 	  | TokenFloat Float
@@ -60,7 +64,11 @@ tokens :-
 	\*							{\s -> TokenMul}
 	\=							{\s -> TokenEqual}
 	\=\=						{\s -> TokenEquals}
-	\!\=						{\s -> TokenDiff}
+    \!\=						{\s -> TokenDiff}
+    \>                          {\s -> TokenGt}
+    \>\=                        {\s -> TokenGtEq}
+    \<                          {\s -> TokenLess}
+    \<\=                        {\s -> TokenLessEq}
 	$alpha [$alpha $digit \_]*	{\s -> TokenSymbol s}
 	$digit+						{\s -> TokenInt (read s)}
 	$digit\.digit+				{\s -> TokenFloat (read s)}
@@ -70,6 +78,6 @@ tokens :-
 	\}							{\s -> TokenRBrace}
 	\[							{\s -> TokenLBracket}
 	\]							{\s -> TokenRBracket}
-	\r?\n 						; -- {\s -> TokenNewline}
+	\r?\n 					    {\s -> TokenNewline}
 	\, 							{\s -> TokenComma}
 
