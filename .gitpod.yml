@@ -1,0 +1,8 @@
+#Based in hpod: https://github.com/torrlane/gitpod_haskell/blob/master/.gitpod.yml
+image:
+  file: Dockerfile
+
+vscode:
+  extensions:
+    - justusadam.language-haskell@2.6.0:CvYnp3YmQPTuto0m1di+1A==
+    - hoovercj.haskell-linter@0.0.6:VpJluXvOyr9Iw7TIKg2Oyg==

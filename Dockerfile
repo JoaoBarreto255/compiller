@@ -9,5 +9,5 @@ FROM gitpod/workspace-full
 # initialise
 USER gitpod
 RUN curl -sSL https://get.haskellstack.org/ | sh \
- && stack setup && stack install hlint
+ && stack setup && stack install hlint && stack install alex && stack install happy
 USER root
