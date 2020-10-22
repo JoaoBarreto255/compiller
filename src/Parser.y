@@ -59,7 +59,7 @@ module Parser(
 PROGRAM: extern FNHEAD NL PROGRAM   { let (name, args) = $2 in (Extern name args) : $4 }
        | FNLIST                     { $1 }
 
-FNLIST: FNLIST FNDECL            { $1: $2 }
+FNLIST: FNLIST FNDECL               { $1: $2 }
       | FNDECL                      { [$1] }
 
 FNDECL: fn FNHEAD '=' STMT          { let (name, args) = $2 in Function name args $4 }
@@ -109,7 +109,6 @@ PARAMLIST: PARAMLIST ',' BOOLEXPR   { $1: $3 }
 
 
 {
-
 parseError :: [Token] -> Except String a
 parseError (l:ls) = throwError (show l)
 parseError [] = throwError "Unexpected end of input"
