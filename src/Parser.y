@@ -56,51 +56,56 @@ module Parser(
 %left NEG 
 %% 
 
-PROGRAM: extern SYM '(' ARGLIST ')' NL PROGRAM { (Extern $2 $4) : $7 }
-       | FNLIST             { $1 }
+PROGRAM: extern FNHEAD NL PROGRAM   { let (name, args) = $2 in (Extern name args) : $4 }
+       | FNLIST                     { $1 }
 
-ARGLIST: SYM ',' ARGLIST { (Var $1):$3 }
-       | SYM             { Var $1 }
-       | {- Empty -}     { [] }
+FNLIST: FNLIST FNDECL            { $1: $2 }
+      | FNDECL                      { [$1] }
 
-FNDECL: fn SYM '(' ARGLIST ')' '=' STMT { (Function $2 $4 $7) }
+FNDECL: fn FNHEAD '=' STMT          { let (name, args) = $2 in Function name args $4 }
 
-FNLIST: FNLIST NL FNDECL { $1: $3 }
-      | FNDECL           { $1 }
+FNHEAD: SYM '(' ARGLIST ')'         { ($1, $3) }
 
-STMT: STMT NL ASSIGNEXPR  { $1:$3 }
-    | ASSIGNEXPR          { $1 }
+ARGLIST: SYM SYM ',' ARGLIST        { (Var $2 (Type $1)):$4 }
+       | SYM SYM                    { [Var $2 (Type $1)] }
+       | {- Empty -}                { [] }
 
-ASSIGNEXPR: SYM '=' BOOLEXPR              { Assign $1 $3 }
-          | BOOLEXPR    { $1 }
+STMT: ASSIGNEXPR NL STMT            { $1:$3 }
+    | ASSIGNEXPR NL                 { [$1] }
+    | ASSIGNEXPR                    { [$1] }
 
-BOOLEXPR: CMPEXPR '==' CMPEXPR            { BinOp Equals $1 $3 }
-        | CMPEXPR '!=' CMPEXPR            { BinOp Difference $1 $3 }
-CMPEXPR: EXPR '>' EXPR             { BinOp Less $3 $1 }
-       | EXPR '>=' EXPR            { BinOp LessEq $3 $1 }
-       | EXPR '<' EXPR             { BinOp Less $1 $3 }
-       | EXPR '<=' EXPR            { BinOp LessEq $1 $3 }
-       | EXPR                      { $1 }
+ASSIGNEXPR: SYM '=' BOOLEXPR        { Assign $1 $3 }
+          | BOOLEXPR                { $1 }
 
-EXPR: ATOM '+' EXPR             { BinOp Add $1 $3 }
-    | ATOM '-' EXPR             { BinOp Subtract $1 $3 }
-    | ATOM '*' EXPR             { BinOp Times $1 $3 }
-    | ATOM '/' EXPR             { BinOp Division $1 $3 }
-    | ATOM                      { $1 }
+BOOLEXPR: CMPEXPR '==' CMPEXPR      { BinOp Equals $1 $3 }
+        | CMPEXPR '!=' CMPEXPR      { BinOp Difference $1 $3 }
+        | not BOOLEXPR              { Not $2 }
+        | true                      { Integer 1 }
+        | false                     { Integer 0 }
+        | CMPEXPR                   { $1 }
 
-ATOM: not EXPR                  { Not $2 }
-    | '-' ATOM %prec NEG        { Negate $2 }
-    | '(' EXPR ')'              { $2 }
-    | SYM '(' PARAMLIST ')'     { Call $1 $3 }
-    | INT                       { Integer $1 }
-    | FLOAT                     { Float $1 }
-    | SYM                       { Var $1 }
-    | true                      { Integer 1 }
-    | false                     { Integer 0 }
+CMPEXPR: EXPR '>' EXPR              { BinOp Less $3 $1 }
+       | EXPR '>=' EXPR             { BinOp LessEq $3 $1 }
+       | EXPR '<' EXPR              { BinOp Less $1 $3 }
+       | EXPR '<=' EXPR             { BinOp LessEq $1 $3 }
+       | EXPR                       { $1 }
 
-PARAMLIST: EXPR ',' PARAMLIST   { $1: $3 }
-         | EXPR                 { $1 }
-         | {- Empty -}          { [] }
+EXPR: EXPR '+' EXPR                 { BinOp Add $1 $3 }
+    | EXPR '-' EXPR                 { BinOp Subtract $1 $3 }
+    | EXPR '*' EXPR                 { BinOp Times $1 $3 }
+    | EXPR '/' EXPR                 { BinOp Division $1 $3 }
+    | '-' EXPR %prec NEG            { Negate $2 }
+    | ATOM                          { $1 }
+
+ATOM: '(' BOOLEXPR ')'              { $2 }
+    | SYM '(' PARAMLIST ')'         { Call $1 $3 }
+    | INT                           { Integer $1 }
+    | FLOAT                         { Float $1 }
+    | SYM                           { Var $1 CallVar }
+
+PARAMLIST: PARAMLIST ',' BOOLEXPR   { $1: $3 }
+         | BOOLEXPR                 { [$1] }
+         | {- Empty -}              { [] }
 
 
 {
@@ -109,7 +114,7 @@ parseError :: [Token] -> Except String a
 parseError (l:ls) = throwError (show l)
 parseError [] = throwError "Unexpected end of input"
 
-parseExpr :: String -> Either String Expr
+parseExpr :: String -> Either String [Expr]
 parseExpr input = runExcept $ do
   tokenStream <- scanTokens input
   expr tokenStream

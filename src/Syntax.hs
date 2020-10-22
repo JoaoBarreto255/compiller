@@ -7,11 +7,16 @@ module Syntax where
         | BinOp Op Expr Expr
         | Negate Expr
         | Not Expr
-        | Var Name
+        | Var Name Type
         | Assign Name Expr
         | Call Name [Expr]
         | Function Name [Expr] Expr
         | Extern Name [Expr]
+        deriving (Eq, Ord, Show)
+    
+    data Type 
+        = Type String 
+        | CallVar
         deriving (Eq, Ord, Show)
     
     data Op
