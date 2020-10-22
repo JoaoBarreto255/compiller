@@ -3,7 +3,7 @@
 {-# LINE 1 "src/Lexer.x" #-}
 
 module Lexer(
-	Token(...),
+	Token(..),
 	scanTokens
 ) where
 	import Syntax
@@ -24,6 +24,7 @@ module Lexer(
       | TokenGtEq
       | TokenLess
       | TokenLessEq
+      | TokenNot
 	  | TokenSymbol String
 	  | TokenInt Int
 	  | TokenFloat Float
@@ -7670,6 +7671,7 @@ alex_action_25 = \s -> TokenLBracket
 alex_action_26 = \s -> TokenRBracket
 alex_action_27 = \s -> TokenNewline
 alex_action_28 = \s -> TokenComma
+alex_action_29 = \s -> TokenNot
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE

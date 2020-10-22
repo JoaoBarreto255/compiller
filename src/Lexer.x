@@ -1,6 +1,6 @@
 {
 module Lexer(
-	Token(...),
+	Token(..),
 	scanTokens
 ) where
 	import Syntax
@@ -21,6 +21,7 @@ module Lexer(
       | TokenGtEq
       | TokenLess
       | TokenLessEq
+      | TokenNot
 	  | TokenSymbol String
 	  | TokenInt Int
 	  | TokenFloat Float
@@ -80,4 +81,4 @@ tokens :-
 	\]							{\s -> TokenRBracket}
 	\r?\n 					    {\s -> TokenNewline}
 	\, 							{\s -> TokenComma}
-
+    not                         {\s -> TokenNot}
