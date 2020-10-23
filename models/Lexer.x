@@ -1,43 +1,6 @@
 {
-module Lexer(
-	Token(..),
-	scanTokens
-) where
-	import Syntax
-
-	data Token 
-	  = TokenFn
-	  | TokenFalse
-	  | TokenTrue
-	  | TokenExtern
-	  | TokenAdd
-	  | TokenSub
-	  | TokenMul
-	  | TokenDiv
-	  | TokenEqual
-	  | TokenEquals
-      | TokenDiff
-      | TokenGt
-      | TokenGtEq
-      | TokenLess
-      | TokenLessEq
-      | TokenNot
-	  | TokenSymbol String
-	  | TokenInt Int
-	  | TokenFloat Float
-	  | TokenLParen
-	  | TokenRParen
-	  | TokenLBrace
-	  | TokenRBrace
-	  | TokenLBracket
-	  | TokenRBracket
-	  | TokenEOF
-	  | TokenNewline
-	  | TokenComma
-	  deriving (Eq, Show)
-	
-	scanTokens :: String -> [Token]
-	scanTokens = alexScanTokens
+module Lexer(Token(..), scanTokens) where
+import Syntax
 }
 
 %wrapper "basic"
@@ -82,3 +45,39 @@ tokens :-
 	\r?\n 					    {\s -> TokenNewline}
 	\, 							{\s -> TokenComma}
     not                         {\s -> TokenNot}
+
+{
+data Token 
+    = TokenFn
+    | TokenFalse
+    | TokenTrue
+    | TokenExtern
+    | TokenAdd
+    | TokenSub
+    | TokenMul
+    | TokenDiv
+    | TokenEqual
+    | TokenEquals
+    | TokenDiff
+    | TokenGt
+    | TokenGtEq
+    | TokenLess
+    | TokenLessEq
+    | TokenNot
+    | TokenSymbol String
+    | TokenInt Int
+    | TokenFloat Float
+    | TokenLParen
+    | TokenRParen
+    | TokenLBrace
+    | TokenRBrace
+    | TokenLBracket
+    | TokenRBracket
+    | TokenEOF
+    | TokenNewline
+    | TokenComma
+    deriving (Eq, Show)
+	
+scanTokens :: String -> [Token]
+scanTokens = alexScanTokens
+}

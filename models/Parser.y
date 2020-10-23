@@ -1,13 +1,13 @@
 {
 
 module Parser(
-    parseExpr,
-    parseTokens
+  parseExpr,
+  parseTokens
 ) where
-    import Lexer
-    import Sytax
+import Lexer
+import Syntax
 
-    import Control.Monad.Except
+import Control.Monad.Except
 }
 -- Lexer Structure
 %tokentype  { Token }
@@ -59,7 +59,7 @@ module Parser(
 PROGRAM: extern FNHEAD NL PROGRAM   { let (name, args) = $2 in (Extern name args) : $4 }
        | FNLIST                     { $1 }
 
-FNLIST: FNLIST FNDECL               { $1: $2 }
+FNLIST: FNDECL FNLIST                { $1: $2 }
       | FNDECL                      { [$1] }
 
 FNDECL: fn FNHEAD '=' STMT          { let (name, args) = $2 in Function name args $4 }
