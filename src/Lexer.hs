@@ -1,46 +1,9 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-missing-signatures #-}
 {-# LANGUAGE CPP #-}
-{-# LINE 1 "src/Lexer.x" #-}
+{-# LINE 1 "models/Lexer.x" #-}
 
-module Lexer(
-	Token(..),
-	scanTokens
-) where
-	import Syntax
-
-	data Token 
-	  = TokenFn
-	  | TokenFalse
-	  | TokenTrue
-	  | TokenExtern
-	  | TokenAdd
-	  | TokenSub
-	  | TokenMul
-	  | TokenDiv
-	  | TokenEqual
-	  | TokenEquals
-      | TokenDiff
-      | TokenGt
-      | TokenGtEq
-      | TokenLess
-      | TokenLessEq
-      | TokenNot
-	  | TokenSymbol String
-	  | TokenInt Int
-	  | TokenFloat Float
-	  | TokenLParen
-	  | TokenRParen
-	  | TokenLBrace
-	  | TokenRBrace
-	  | TokenLBracket
-	  | TokenRBracket
-	  | TokenEOF
-	  | TokenNewline
-	  | TokenComma
-	  deriving (Eq, Show)
-	
-	scanTokens :: String -> [Token]
-	scanTokens = alexScanTokens
+module Lexer(Token(..), scanTokens) where
+import Syntax
 
 #if __GLASGOW_HASKELL__ >= 603
 #include "ghcconfig.h"
@@ -7644,6 +7607,42 @@ alex_actions = array (0 :: Int, 38)
   , (1,alex_action_26)
   , (0,alex_action_28)
   ]
+
+{-# LINE 52 "models/Lexer.x" #-}
+
+data Token 
+    = TokenFn
+    | TokenFalse
+    | TokenTrue
+    | TokenExtern
+    | TokenAdd
+    | TokenSub
+    | TokenMul
+    | TokenDiv
+    | TokenEqual
+    | TokenEquals
+    | TokenDiff
+    | TokenGt
+    | TokenGtEq
+    | TokenLess
+    | TokenLessEq
+    | TokenNot
+    | TokenSymbol String
+    | TokenInt Int
+    | TokenFloat Float
+    | TokenLParen
+    | TokenRParen
+    | TokenLBrace
+    | TokenRBrace
+    | TokenLBracket
+    | TokenRBracket
+    | TokenEOF
+    | TokenNewline
+    | TokenComma
+    deriving (Eq, Show)
+	
+scanTokens :: String -> [Token]
+scanTokens = alexScanTokens
 
 alex_action_3 = \s -> TokenFn
 alex_action_4 = \s -> TokenTrue

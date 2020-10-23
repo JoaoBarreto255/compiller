@@ -113,7 +113,7 @@ parseError :: [Token] -> Except String a
 parseError (l:ls) = throwError (show l)
 parseError [] = throwError "Unexpected end of input"
 
-parseExpr :: String -> Either String [Expr]
+parseExpr :: String -> Either String Expr
 parseExpr input = runExcept $ do
   tokenStream <- scanTokens input
   expr tokenStream

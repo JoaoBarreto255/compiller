@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7dcf2dd533078497505a5856f0743b0e515d20eb693779379baf41097235c97f
+-- hash: 6291490aede3c14e613f1937ceedd8ded14510522d243f33f5d4624d339b2195
 
 name:           compiler
 version:        0.1.0.0
@@ -28,9 +28,7 @@ source-repository head
 library
   exposed-modules:
       Lexer
-      Lexer
       Lib
-      Parser
       Parser
       Syntax
   other-modules:
@@ -38,19 +36,24 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
+    , mtl
   default-language: Haskell2010
 
 executable compiler-exe
   main-is: Main.hs
   other-modules:
+      Repl
       Paths_compiler
   hs-source-dirs:
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , compiler
+    , mtl
   default-language: Haskell2010
 
 test-suite compiler-test
@@ -62,6 +65,8 @@ test-suite compiler-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , compiler
+    , mtl
   default-language: Haskell2010

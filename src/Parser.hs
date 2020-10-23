@@ -1,12 +1,12 @@
 {-# OPTIONS_GHC -w #-}
 module Parser(
-    parseExpr,
-    parseTokens
+  parseExpr,
+  parseTokens
 ) where
-    import Lexer
-    import Sytax
+import Lexer
+import Syntax
 
-    import Control.Monad.Except
+import Control.Monad.Except
 import qualified Data.Array as Happy_Data_Array
 import qualified Data.Bits as Bits
 import Control.Applicative(Applicative(..))
@@ -31,7 +31,7 @@ data HappyAbsSyn t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15
 	| HappyAbsSyn15 t15
 
 happyExpList :: Happy_Data_Array.Array Int Int
-happyExpList = Happy_Data_Array.listArray (0,168) ([32768,4,0,8192,0,0,0,32768,0,0,0,2048,0,0,0,0,0,0,2048,0,32,0,0,128,0,0,0,0,0,16,2304,0,0,0,8192,32768,16405,448,0,0,0,0,2048,0,0,0,0,48,0,15360,30,0,0,0,0,0,0,0,0,0,172,3586,0,4100,112,11008,32896,3,0,0,0,0,0,0,258,0,0,16,0,0,256,0,0,0,0,1024,0,0,0,22528,1025,28,2752,57376,0,0,2,0,2048,0,0,0,0,0,0,0,4100,112,8192,32896,3,256,7172,0,8200,224,16384,256,7,512,14344,0,16400,448,32768,512,14,1024,28688,0,32800,896,22528,1025,28,0,0,0,0,0,0,0,0,30720,0,0,960,0,0,30,0,61440,0,0,0,0,0,0,0,32768,1,0,3072,0,0,0,0,0,0,0,0,1056,0,0,0,0,0,16,0,0,0,0,0,45056,2050,56,0,0,0,0
+happyExpList = Happy_Data_Array.listArray (0,168) ([32768,4,0,8192,0,0,0,32768,0,0,0,0,0,0,64,0,0,0,2048,0,32,0,0,128,0,0,0,0,0,16,2304,0,0,0,8192,32768,16405,448,0,0,0,0,2048,0,0,0,0,48,0,15360,30,0,0,0,0,0,0,0,0,0,172,3586,0,4100,112,11008,32896,3,0,0,0,0,0,0,258,0,0,16,0,0,256,0,0,0,0,1024,0,0,0,22528,1025,28,2752,57376,0,0,2,0,2048,0,0,0,0,0,0,0,4100,112,8192,32896,3,256,7172,0,8200,224,16384,256,7,512,14344,0,16400,448,32768,512,14,1024,28688,0,32800,896,22528,1025,28,0,0,0,0,0,0,0,0,30720,0,0,960,0,0,30,0,61440,0,0,0,0,0,0,0,32768,1,0,3072,0,0,0,0,0,0,0,0,1056,0,0,0,0,0,16,0,0,0,0,0,45056,2050,56,0,0,0,0
 	])
 
 {-# NOINLINE happyExpListPerState #-}
@@ -64,10 +64,11 @@ action_2 _ = happyFail (happyExpListPerState 2)
 action_3 (43) = happyAccept
 action_3 _ = happyFail (happyExpListPerState 3)
 
-action_4 (16) = happyShift action_6
-action_4 (6) = happyGoto action_9
 action_4 _ = happyReduce_2
 
+action_5 (16) = happyShift action_6
+action_5 (5) = happyGoto action_9
+action_5 (6) = happyGoto action_5
 action_5 _ = happyReduce_4
 
 action_6 (42) = happyShift action_8
@@ -438,8 +439,8 @@ happyReduction_2 (HappyAbsSyn5  happy_var_1)
 happyReduction_2 _  = notHappyAtAll 
 
 happyReduce_3 = happySpecReduce_2  5 happyReduction_3
-happyReduction_3 (HappyAbsSyn6  happy_var_2)
-	(HappyAbsSyn5  happy_var_1)
+happyReduction_3 (HappyAbsSyn5  happy_var_2)
+	(HappyAbsSyn6  happy_var_1)
 	 =  HappyAbsSyn5
 		 (happy_var_1: happy_var_2
 	)
@@ -793,7 +794,7 @@ parseError :: [Token] -> Except String a
 parseError (l:ls) = throwError (show l)
 parseError [] = throwError "Unexpected end of input"
 
-parseExpr :: String -> Either String [Expr]
+parseExpr :: String -> Either String Expr
 parseExpr input = runExcept $ do
   tokenStream <- scanTokens input
   expr tokenStream

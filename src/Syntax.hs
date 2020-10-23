@@ -29,8 +29,3 @@ module Syntax where
         | LessEq
         | Difference
         deriving (Eq, Ord, Show)
-    
-    data UnOp 
-        = Minus 
-        | Not 
-        deriving (Eq, Ord, Show)
