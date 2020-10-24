@@ -56,27 +56,35 @@ import Control.Monad.Except
 %left NEG 
 %% 
 
-PROGRAM: extern FNHEAD NL PROGRAM   { let (name, args) = $2 in (Extern name args) : $4 }
+PROGRAM:: { Expr }
+PROGRAM: extern FNHEAD NL PROGRAM   { let Program (x:xs) fns = $4 in Program ($2:x:xs) fns }
        | FNLIST                     { $1 }
 
-FNLIST: FNDECL FNLIST                { $1: $2 }
-      | FNDECL                      { [$1] }
+FNLIST:: { Expr }
+FNLIST: FNDECL FNLIST               { let Program _ (x:xs) = $2 in Program [] ($1:xs) }
+      | FNDECL                      { Program [] [$1] }
 
-FNDECL: fn FNHEAD '=' STMT          { let (name, args) = $2 in Function name args $4 }
+FNDECL:: { Expr }
+FNDECL: fn FNHEAD '=' STMT          { let Extern name args = $2 in Function name args $4 }
 
-FNHEAD: SYM '(' ARGLIST ')'         { ($1, $3) }
+FNHEAD:: { Expr }
+FNHEAD: SYM '(' ARGLIST ')'         { Extern $1 $3 }
 
-ARGLIST: SYM SYM ',' ARGLIST        { (Var $2 (Type $1)):$4 }
+ARGLIST:: { [Expr] }
+ARGLIST: SYM SYM ',' ARGLIST        { let (x:xs) = $4 in (Var $2 (Type $1)):x:xs }
        | SYM SYM                    { [Var $2 (Type $1)] }
        | {- Empty -}                { [] }
 
-STMT: ASSIGNEXPR NL STMT            { $1:$3 }
-    | ASSIGNEXPR NL                 { [$1] }
-    | ASSIGNEXPR                    { [$1] }
+STMT:: { Expr }
+STMT: ASSIGNEXPR NL STMT            { let Body (x:xs) = $3 in Body ($1:x:xs) }
+    | ASSIGNEXPR NL                 { Body [$1] }
+    | ASSIGNEXPR                    { Body [$1] }
 
+ASSIGNEXPR:: { Expr }
 ASSIGNEXPR: SYM '=' BOOLEXPR        { Assign $1 $3 }
           | BOOLEXPR                { $1 }
 
+BOOLEXPR:: { Expr }
 BOOLEXPR: CMPEXPR '==' CMPEXPR      { BinOp Equals $1 $3 }
         | CMPEXPR '!=' CMPEXPR      { BinOp Difference $1 $3 }
         | not BOOLEXPR              { Not $2 }
@@ -84,12 +92,14 @@ BOOLEXPR: CMPEXPR '==' CMPEXPR      { BinOp Equals $1 $3 }
         | false                     { Integer 0 }
         | CMPEXPR                   { $1 }
 
+CMPEXPR:: { Expr }
 CMPEXPR: EXPR '>' EXPR              { BinOp Less $3 $1 }
        | EXPR '>=' EXPR             { BinOp LessEq $3 $1 }
        | EXPR '<' EXPR              { BinOp Less $1 $3 }
        | EXPR '<=' EXPR             { BinOp LessEq $1 $3 }
        | EXPR                       { $1 }
 
+EXPR:: { Expr }
 EXPR: EXPR '+' EXPR                 { BinOp Add $1 $3 }
     | EXPR '-' EXPR                 { BinOp Subtract $1 $3 }
     | EXPR '*' EXPR                 { BinOp Times $1 $3 }
@@ -97,13 +107,15 @@ EXPR: EXPR '+' EXPR                 { BinOp Add $1 $3 }
     | '-' EXPR %prec NEG            { Negate $2 }
     | ATOM                          { $1 }
 
+ATOM:: { Expr }
 ATOM: '(' BOOLEXPR ')'              { $2 }
     | SYM '(' PARAMLIST ')'         { Call $1 $3 }
     | INT                           { Integer $1 }
     | FLOAT                         { Float $1 }
     | SYM                           { Var $1 CallVar }
 
-PARAMLIST: PARAMLIST ',' BOOLEXPR   { $1: $3 }
+PARAMLIST:: { [Expr] }
+PARAMLIST: BOOLEXPR ',' PARAMLIST   { let (x:xs) = $3 in ($1:x:xs) }
          | BOOLEXPR                 { [$1] }
          | {- Empty -}              { [] }
 

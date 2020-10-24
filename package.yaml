@@ -30,6 +30,7 @@ library:
 executables:
   compiler-exe:
     main:                Main.hs
+    crepl:               Repl.hs
     source-dirs:         app
     ghc-options:
     - -threaded

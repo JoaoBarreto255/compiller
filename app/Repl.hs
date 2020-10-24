@@ -1,5 +1,5 @@
 module Repl where
--- import Syntax
+import Syntax
 import Parser
 
 main :: IO ()

@@ -12,6 +12,8 @@ module Syntax where
         | Call Name [Expr]
         | Function Name [Expr] Expr
         | Extern Name [Expr]
+        | Body [Expr]
+        | Program [Expr] [Expr]
         deriving (Eq, Ord, Show)
     
     data Type 
