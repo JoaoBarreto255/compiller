@@ -79,12 +79,13 @@ data Token
     | TokenComma AlexPosn
     deriving (Eq, Show)
 
-scanTokens :: String -> Either String [Token]
-scanTokens str = go(alexStartPos, '\n', [], str)
+scanTokens :: String -> Except String [Token]
+scanTokens str = go (alexStartPos, '\n', [], str) []
         where 
-            go inp@(pos, _, (t:tokens), str) = case alexScan inp 0 of 
-                AlexEOF -> t:tokens
+            go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except String [Token]
+            go inp@(pos, _, _, str) tokens = case alexScan inp 0 of 
+                AlexEOF -> return tokens
                 AlexError ((AlexPn _ l c), _, _, _) -> throwError $ "lexical error in file at " ++ (show l) ++ " line, " ++ (show c) ++ " column"
-                AlexSkip newInput len -> go newInput
-                AlexToken newInput len act -> (act pos (take len str)): go newInput
+                AlexSkip newInput len -> go newInput tokens
+                AlexToken newInput len act -> go newInput ((act pos (take len str)):tokens)
 }
