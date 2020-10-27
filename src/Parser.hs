@@ -596,7 +596,7 @@ happyReduce_6 = happyReduce 4 7 happyReduction_6
 happyReduction_6 (_ `HappyStk`
 	(HappyAbsSyn8  happy_var_3) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TokenSymbol happy_var_1)) `HappyStk`
+	(HappyTerminal (TokenSymbol happy_var_1 _)) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn4
 		 (Extern happy_var_1 happy_var_3
@@ -605,16 +605,16 @@ happyReduction_6 (_ `HappyStk`
 happyReduce_7 = happyReduce 4 8 happyReduction_7
 happyReduction_7 ((HappyAbsSyn8  happy_var_4) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TokenSymbol happy_var_2)) `HappyStk`
-	(HappyTerminal (TokenSymbol happy_var_1)) `HappyStk`
+	(HappyTerminal (TokenSymbol happy_var_2 _)) `HappyStk`
+	(HappyTerminal (TokenSymbol happy_var_1 _)) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn8
 		 (let (x:xs) = happy_var_4 in (Var happy_var_2 (Type happy_var_1)):x:xs
 	) `HappyStk` happyRest
 
 happyReduce_8 = happySpecReduce_2  8 happyReduction_8
-happyReduction_8 (HappyTerminal (TokenSymbol happy_var_2))
-	(HappyTerminal (TokenSymbol happy_var_1))
+happyReduction_8 (HappyTerminal (TokenSymbol happy_var_2 _))
+	(HappyTerminal (TokenSymbol happy_var_1 _))
 	 =  HappyAbsSyn8
 		 ([Var happy_var_2 (Type happy_var_1)]
 	)
@@ -652,7 +652,7 @@ happyReduction_12 _  = notHappyAtAll
 happyReduce_13 = happySpecReduce_3  10 happyReduction_13
 happyReduction_13 (HappyAbsSyn4  happy_var_3)
 	_
-	(HappyTerminal (TokenSymbol happy_var_1))
+	(HappyTerminal (TokenSymbol happy_var_1 _))
 	 =  HappyAbsSyn4
 		 (Assign happy_var_1 happy_var_3
 	)
@@ -817,28 +817,28 @@ happyReduce_33 = happyReduce 4 14 happyReduction_33
 happyReduction_33 (_ `HappyStk`
 	(HappyAbsSyn8  happy_var_3) `HappyStk`
 	_ `HappyStk`
-	(HappyTerminal (TokenSymbol happy_var_1)) `HappyStk`
+	(HappyTerminal (TokenSymbol happy_var_1 _)) `HappyStk`
 	happyRest)
 	 = HappyAbsSyn4
 		 (Call happy_var_1 happy_var_3
 	) `HappyStk` happyRest
 
 happyReduce_34 = happySpecReduce_1  14 happyReduction_34
-happyReduction_34 (HappyTerminal (TokenInt happy_var_1))
+happyReduction_34 (HappyTerminal (TokenInt happy_var_1 _))
 	 =  HappyAbsSyn4
 		 (Integer happy_var_1
 	)
 happyReduction_34 _  = notHappyAtAll 
 
 happyReduce_35 = happySpecReduce_1  14 happyReduction_35
-happyReduction_35 (HappyTerminal (TokenFloat happy_var_1))
+happyReduction_35 (HappyTerminal (TokenFloat happy_var_1 _))
 	 =  HappyAbsSyn4
 		 (Float happy_var_1
 	)
 happyReduction_35 _  = notHappyAtAll 
 
 happyReduce_36 = happySpecReduce_1  14 happyReduction_36
-happyReduction_36 (HappyTerminal (TokenSymbol happy_var_1))
+happyReduction_36 (HappyTerminal (TokenSymbol happy_var_1 _))
 	 =  HappyAbsSyn4
 		 (Var happy_var_1 CallVar
 	)
@@ -871,33 +871,33 @@ happyNewToken action sts stk [] =
 happyNewToken action sts stk (tk:tks) =
 	let cont i = action i i tk (HappyState action) sts stk tks in
 	case tk of {
-	TokenFn -> cont 16;
-	TokenFalse -> cont 17;
-	TokenTrue -> cont 18;
-	TokenExtern -> cont 19;
-	TokenNot -> cont 20;
-	TokenAdd -> cont 21;
-	TokenSub -> cont 22;
-	TokenMul -> cont 23;
-	TokenDiv -> cont 24;
-	TokenEqual -> cont 25;
-	TokenEquals -> cont 26;
-	TokenDiff -> cont 27;
-	TokenGt -> cont 28;
-	TokenGtEq -> cont 29;
-	TokenLess -> cont 30;
-	TokenLessEq -> cont 31;
-	TokenLParen -> cont 32;
-	TokenRParen -> cont 33;
-	TokenLBrace -> cont 34;
-	TokenRBrace -> cont 35;
-	TokenLBracket -> cont 36;
-	TokenRBracket -> cont 37;
-	TokenComma -> cont 38;
-	TokenNewline -> cont 39;
-	TokenInt happy_dollar_dollar -> cont 40;
-	TokenFloat happy_dollar_dollar -> cont 41;
-	TokenSymbol happy_dollar_dollar -> cont 42;
+	TokenFn happy_dollar_dollar -> cont 16;
+	TokenFalse happy_dollar_dollar -> cont 17;
+	TokenTrue happy_dollar_dollar -> cont 18;
+	TokenExtern happy_dollar_dollar -> cont 19;
+	TokenNot happy_dollar_dollar -> cont 20;
+	TokenAdd happy_dollar_dollar -> cont 21;
+	TokenSub happy_dollar_dollar -> cont 22;
+	TokenMul happy_dollar_dollar -> cont 23;
+	TokenDiv happy_dollar_dollar -> cont 24;
+	TokenEqual happy_dollar_dollar -> cont 25;
+	TokenEquals happy_dollar_dollar -> cont 26;
+	TokenDiff happy_dollar_dollar -> cont 27;
+	TokenGt happy_dollar_dollar -> cont 28;
+	TokenGtEq happy_dollar_dollar -> cont 29;
+	TokenLess happy_dollar_dollar -> cont 30;
+	TokenLessEq happy_dollar_dollar -> cont 31;
+	TokenLParen happy_dollar_dollar -> cont 32;
+	TokenRParen happy_dollar_dollar -> cont 33;
+	TokenLBrace happy_dollar_dollar -> cont 34;
+	TokenRBrace happy_dollar_dollar -> cont 35;
+	TokenLBracket happy_dollar_dollar -> cont 36;
+	TokenRBracket happy_dollar_dollar -> cont 37;
+	TokenComma happy_dollar_dollar -> cont 38;
+	TokenNewline happy_dollar_dollar -> cont 39;
+	TokenInt happy_dollar_dollar _ -> cont 40;
+	TokenFloat happy_dollar_dollar _ -> cont 41;
+	TokenSymbol happy_dollar_dollar _ -> cont 42;
 	_ -> happyError' ((tk:tks), [])
 	}
 

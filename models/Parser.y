@@ -18,33 +18,33 @@ import Control.Monad.Except
 
 -- Token Names
 %token 
-    fn      { TokenFn }
-    false   { TokenFalse }
-    true    { TokenTrue }
-    extern  { TokenExtern }
-    not     { TokenNot}
-    '+'     { TokenAdd }
-	'-'     { TokenSub }
-	'*'     { TokenMul }
-	'/'     { TokenDiv }
-	'='     { TokenEqual }
-	'=='    { TokenEquals }
-    '!='    { TokenDiff }
-    '>'     { TokenGt }
-    '>='    { TokenGtEq }
-    '<'     { TokenLess }
-    '<='    { TokenLessEq }
-	'('     { TokenLParen }
-	')'     { TokenRParen }
-	'{'     { TokenLBrace }
-	'}'     { TokenRBrace }
-	'['     { TokenLBracket }
-	']'     { TokenRBracket }
-    ','     { TokenComma }
-    NL    { TokenNewline }
-    INT     { TokenInt $$ }
-    FLOAT   { TokenFloat $$ }
-    SYM     { TokenSymbol $$ }
+    fn      { TokenFn $$ }
+    false   { TokenFalse $$ }
+    true    { TokenTrue $$ }
+    extern  { TokenExtern $$ }
+    not     { TokenNot $$ }
+    '+'     { TokenAdd $$ }
+	'-'     { TokenSub $$ }
+	'*'     { TokenMul $$ }
+	'/'     { TokenDiv $$ }
+	'='     { TokenEqual $$ }
+	'=='    { TokenEquals $$ }
+    '!='    { TokenDiff $$ }
+    '>'     { TokenGt $$ }
+    '>='    { TokenGtEq $$ }
+    '<'     { TokenLess $$ }
+    '<='    { TokenLessEq $$ }
+	'('     { TokenLParen $$ }
+	')'     { TokenRParen $$ }
+	'{'     { TokenLBrace $$ }
+	'}'     { TokenRBrace $$ }
+	'['     { TokenLBracket $$ }
+	']'     { TokenRBracket $$ }
+    ','     { TokenComma $$ }
+    NL      { TokenNewline $$ }
+    INT     { TokenInt $$ _ }
+    FLOAT   { TokenFloat $$ _ }
+    SYM     { TokenSymbol $$ _ }
 
 
 -- declare associative

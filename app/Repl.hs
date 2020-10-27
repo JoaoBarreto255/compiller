@@ -13,8 +13,8 @@ processInput = do
              line <- getLine
              result <- parseExpr line
              putStrLn $ case result of
-                (x:xs) -> show (x:xs)
-                error  -> error
+                Program ext fns -> show result
+                _ -> show "Error!"
              processInput
 
         
