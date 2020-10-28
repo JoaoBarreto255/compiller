@@ -9,12 +9,11 @@ main = do
 
 processInput :: IO ()
 processInput = do 
-             putStr ">>>"
+             putStr ">>> "
              line <- getLine
-             result <- parseExpr line
-             putStrLn $ case result of
-                Program ext fns -> show result
-                _ -> show "Error!"
+             putStrLn $ case parseExpr line of
+                Right expr -> show expr
+                Left error -> error
              processInput
 
         
