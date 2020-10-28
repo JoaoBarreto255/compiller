@@ -1,4 +1,4 @@
-module Repl where
+module Main where
 import Syntax
 import Parser
 
@@ -9,7 +9,7 @@ main = do
 
 processInput :: IO ()
 processInput = do 
-             putStr ">>> "
+             putStr ">>> " 
              line <- getLine
              putStrLn $ case parseExpr line of
                 Right expr -> show expr

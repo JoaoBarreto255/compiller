@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6291490aede3c14e613f1937ceedd8ded14510522d243f33f5d4624d339b2195
+-- hash: 60ca10c7aa8fefc9c8111c752fbcfcaf8f0afff4bdfd507aa2e6b6223251ecac
 
 name:           compiler
 version:        0.1.0.0
@@ -44,10 +44,23 @@ library
 executable compiler-exe
   main-is: Main.hs
   other-modules:
-      Repl
       Paths_compiler
   hs-source-dirs:
       app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      array
+    , base >=4.7 && <5
+    , compiler
+    , mtl
+  default-language: Haskell2010
+
+executable crepl-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_compiler
+  hs-source-dirs:
+      app/repl
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array

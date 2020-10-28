@@ -30,8 +30,16 @@ library:
 executables:
   compiler-exe:
     main:                Main.hs
-    crepl:               Repl.hs
     source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - compiler
+  crepl-exe:
+    main:               Main.hs
+    source-dirs:         app/repl
     ghc-options:
     - -threaded
     - -rtsopts
