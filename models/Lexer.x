@@ -1,5 +1,5 @@
 {
-module Lexer(Token(..), AlexPosn, scanTokens) where
+module Lexer(Token(..), scanTokens, showTokenError) where
 import Syntax
 import Control.Monad.Except
 }
@@ -88,4 +88,37 @@ scanTokens str = go (alexStartPos, '\n', [], str) []
                 AlexError ((AlexPn _ l c), _, _, _) -> throwError $ "lexical error in file at " ++ (show l) ++ " line, " ++ (show c) ++ " column"
                 AlexSkip newInput len -> go newInput tokens
                 AlexToken newInput len act -> go newInput ((act pos (take len str)):tokens)
+
+showTokenError :: Token -> String
+showTokenError (TokenFn pos) = showToken "fn" pos
+showTokenError (TokenFalse pos) = showToken "false" pos
+showTokenError (TokenTrue pos) = showToken "true" pos
+showTokenError (TokenExtern pos) = showToken "extern" pos
+showTokenError (TokenNot pos) = showToken "not" pos
+showTokenError (TokenAdd pos) = showToken "+" pos
+showTokenError (TokenSub pos) = showToken "-" pos
+showTokenError (TokenMul pos) = showToken "*" pos
+showTokenError (TokenDiv pos) = showToken "/" pos
+showTokenError (TokenEqual pos) = showToken "=" pos
+showTokenError (TokenEquals pos) = showToken "==" pos
+showTokenError (TokenDiff pos) = showToken "!=" pos
+showTokenError (TokenGt pos) = showToken ">" pos
+showTokenError (TokenGtEq pos) = showToken ">=" pos
+showTokenError (TokenLess pos) = showToken "<" pos
+showTokenError (TokenLessEq pos) = showToken "<=" pos
+showTokenError (TokenLParen pos) = showToken "(" pos
+showTokenError (TokenRParen pos) = showToken ")" pos
+showTokenError (TokenLBrace pos) = showToken "{" pos
+showTokenError (TokenRBrace pos) = showToken "}" pos
+showTokenError (TokenLBracket pos) = showToken "[" pos
+showTokenError (TokenRBracket pos) = showToken "]" pos
+showTokenError (TokenComma pos) = showToken "," pos
+showTokenError (TokenNewline pos) = showToken "\\n" pos
+showTokenError (TokenInt val pos) = showToken (show val) pos
+showTokenError (TokenFloat val pos) = showToken (show val) pos
+showTokenError (TokenSymbol val pos) = showToken (show val) pos
+
+showToken :: String -> AlexPosn -> String
+showToken tokenName (AlexPn cp l c) = "\"" ++ tokenName ++ "\" at line " ++ show l ++ " and column "++ show c ++ "."
+
 }

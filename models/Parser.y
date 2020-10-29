@@ -122,13 +122,13 @@ PARAMLIST: BOOLEXPR ',' PARAMLIST   { let (x:xs) = $3 in ($1:x:xs) }
 
 {
 parseError :: [Token] -> Except String a
-parseError (l:ls) = throwError (show l)
+parseError (l:ls) = throwError $ "Unexpected token: " ++ (showTokenError l)
 parseError [] = throwError "Unexpected end of input"
 
 parseExpr :: String -> Either String Expr
 parseExpr input = runExcept $ do
   tokenStream <- scanTokens input
-  expr tokenStream
+  expr $ reverse tokenStream
 
 parseTokens :: String -> Either String [Token]
 parseTokens = runExcept . scanTokens

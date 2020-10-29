@@ -2,7 +2,7 @@
 {-# LANGUAGE CPP #-}
 {-# LINE 1 "models/Lexer.x" #-}
 
-module Lexer(Token(..), scanTokens) where
+module Lexer(Token(..), scanTokens, showTokenError) where
 import Syntax
 import Control.Monad.Except
 
@@ -82,23 +82,23 @@ type Byte = Word8
 -- The input type
 
 
+type AlexInput = (AlexPosn,     -- current position,
+                  Char,         -- previous char
+                  [Byte],       -- pending bytes on current char
+                  String)       -- current input string
 
+ignorePendingBytes :: AlexInput -> AlexInput
+ignorePendingBytes (p,c,_ps,s) = (p,c,[],s)
 
+alexInputPrevChar :: AlexInput -> Char
+alexInputPrevChar (_p,c,_bs,_s) = c
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
+alexGetByte (p,c,(b:bs),s) = Just (b,(p,c,bs,s))
+alexGetByte (_,_,[],[]) = Nothing
+alexGetByte (p,_,[],(c:s))  = let p' = alexMove p c
+                              in case utf8Encode' c of
+                                   (b, bs) -> p' `seq`  Just (b, (p', c, bs, s))
 
 
 
@@ -171,16 +171,16 @@ type Byte = Word8
 -- assuming the usual eight character tab stops.
 
 
+data AlexPosn = AlexPn !Int !Int !Int
+        deriving (Eq,Show)
 
+alexStartPos :: AlexPosn
+alexStartPos = AlexPn 0 1 1
 
-
-
-
-
-
-
-
-
+alexMove :: AlexPosn -> Char -> AlexPosn
+alexMove (AlexPn a l c) '\t' = AlexPn (a+1)  l     (c+alex_tab_size-((c-1) `mod` alex_tab_size))
+alexMove (AlexPn a l _) '\n' = AlexPn (a+1) (l+1)   1
+alexMove (AlexPn a l c) _    = AlexPn (a+1)  l     (c+1)
 
 
 -- -----------------------------------------------------------------------------
@@ -342,25 +342,25 @@ type Byte = Word8
 -- Basic wrapper
 
 
-type AlexInput = (Char,[Byte],String)
 
-alexInputPrevChar :: AlexInput -> Char
-alexInputPrevChar (c,_,_) = c
 
--- alexScanTokens :: String -> [token]
-alexScanTokens str = go ('\n',[],str)
-  where go inp__@(_,_bs,s) =
-          case alexScan inp__ 0 of
-                AlexEOF -> []
-                AlexError _ -> error "lexical error"
-                AlexSkip  inp__' _ln     -> go inp__'
-                AlexToken inp__' len act -> act (take len s) : go inp__'
 
-alexGetByte :: AlexInput -> Maybe (Byte,AlexInput)
-alexGetByte (c,(b:bs),s) = Just (b,(c,bs,s))
-alexGetByte (_,[],[])    = Nothing
-alexGetByte (_,[],(c:s)) = case utf8Encode' c of
-                             (b, bs) -> Just (b, (c, bs, s))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -404,14 +404,14 @@ alexGetByte (_,[],(c:s)) = case utf8Encode' c of
 -- Adds text positions to the basic model.
 
 
-
-
-
-
-
-
-
-
+--alexScanTokens :: String -> [token]
+alexScanTokens str0 = go (alexStartPos,'\n',[],str0)
+  where go inp__@(pos,_,_,str) =
+          case alexScan inp__ 0 of
+                AlexEOF -> []
+                AlexError ((AlexPn _ line column),_,_,_) -> error $ "lexical error at line " ++ (show line) ++ ", column " ++ (show column)
+                AlexSkip  inp__' _ln     -> go inp__'
+                AlexToken inp__' len act -> act pos (take len str) : go inp__'
 
 
 
@@ -7612,73 +7612,106 @@ alex_actions = array (0 :: Int, 38)
 {-# LINE 50 "models/Lexer.x" #-}
 
 data Token 
-    = TokenFn 
-    | TokenFalse 
-    | TokenTrue 
-    | TokenExtern 
-    | TokenAdd 
-    | TokenSub 
-    | TokenMul 
-    | TokenDiv 
-    | TokenEqual 
-    | TokenEquals 
-    | TokenDiff 
-    | TokenGt 
-    | TokenGtEq 
-    | TokenLess 
-    | TokenLessEq 
-    | TokenNot 
-    | TokenSymbol String
-    | TokenInt Int 
-    | TokenFloat Float 
-    | TokenLParen 
-    | TokenRParen 
-    | TokenLBrace 
-    | TokenRBrace 
-    | TokenLBracket 
-    | TokenRBracket 
-    | TokenEOF 
-    | TokenNewline 
-    | TokenComma 
+    = TokenFn AlexPosn
+    | TokenFalse AlexPosn
+    | TokenTrue AlexPosn
+    | TokenExtern AlexPosn
+    | TokenAdd AlexPosn
+    | TokenSub AlexPosn
+    | TokenMul AlexPosn
+    | TokenDiv AlexPosn
+    | TokenEqual AlexPosn
+    | TokenEquals AlexPosn
+    | TokenDiff AlexPosn
+    | TokenGt AlexPosn
+    | TokenGtEq AlexPosn
+    | TokenLess AlexPosn
+    | TokenLessEq AlexPosn
+    | TokenNot AlexPosn
+    | TokenSymbol String AlexPosn
+    | TokenInt Int AlexPosn
+    | TokenFloat Float AlexPosn
+    | TokenLParen AlexPosn
+    | TokenRParen AlexPosn
+    | TokenLBrace AlexPosn
+    | TokenRBrace AlexPosn
+    | TokenLBracket AlexPosn
+    | TokenRBracket AlexPosn
+    | TokenEOF AlexPosn
+    | TokenNewline AlexPosn
+    | TokenComma AlexPosn
     deriving (Eq, Show)
 
 scanTokens :: String -> Except String [Token]
-scanTokens str = go ('\n', [], str) []
-        where
-            go:: (Char, [Byte], String) -> [Token] -> Except String [Token]
-            go inp@(_, _, str) tokens = case alexScan inp 0 of 
+scanTokens str = go (alexStartPos, '\n', [], str) []
+        where 
+            go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except String [Token]
+            go inp@(pos, _, _, str) tokens = case alexScan inp 0 of 
                 AlexEOF -> return tokens
-                AlexError (e_char, _, e_str) -> throwError "lexical error in file " -- ++ (show char) ++ " line, " ++ (show c) ++ " column"
+                AlexError ((AlexPn _ l c), _, _, _) -> throwError $ "lexical error in file at " ++ (show l) ++ " line, " ++ (show c) ++ " column"
                 AlexSkip newInput len -> go newInput tokens
-                AlexToken newInput len act -> let tk = act (take len str) in go newInput (tk:tokens)
+                AlexToken newInput len act -> go newInput ((act pos (take len str)):tokens)
 
-alex_action_3 =  \s -> TokenFn 
-alex_action_4 =  \s -> TokenTrue 
-alex_action_5 =  \s -> TokenFalse 
-alex_action_6 =  \s -> TokenExtern 
-alex_action_7 =  \s -> TokenAdd 
-alex_action_8 =  \s -> TokenSub 
-alex_action_9 =  \s -> TokenDiv 
-alex_action_10 =  \s -> TokenMul 
-alex_action_11 =  \s -> TokenEqual 
-alex_action_12 =  \s -> TokenEquals 
-alex_action_13 =  \s -> TokenDiff 
-alex_action_14 =  \s -> TokenGt 
-alex_action_15 =  \s -> TokenGtEq 
-alex_action_16 =  \s -> TokenLess 
-alex_action_17 =  \s -> TokenLessEq 
-alex_action_18 =  \s -> TokenSymbol s 
-alex_action_19 =  \s -> TokenInt (read s) 
-alex_action_20 =  \s -> TokenFloat (read s) 
-alex_action_21 =  \s -> TokenLParen 
-alex_action_22 =  \s -> TokenRParen 
-alex_action_23 =  \s -> TokenLBrace 
-alex_action_24 =  \s -> TokenRBrace 
-alex_action_25 =  \s -> TokenLBracket 
-alex_action_26 =  \s -> TokenRBracket 
-alex_action_27 =  \s -> TokenNewline 
-alex_action_28 =  \s -> TokenComma 
-alex_action_29 =  \s -> TokenNot 
+showTokenError :: Token -> String
+showTokenError (TokenFn pos) = showToken "fn" pos
+showTokenError (TokenFalse pos) = showToken "false" pos
+showTokenError (TokenTrue pos) = showToken "true" pos
+showTokenError (TokenExtern pos) = showToken "extern" pos
+showTokenError (TokenNot pos) = showToken "not" pos
+showTokenError (TokenAdd pos) = showToken "+" pos
+showTokenError (TokenSub pos) = showToken "-" pos
+showTokenError (TokenMul pos) = showToken "*" pos
+showTokenError (TokenDiv pos) = showToken "/" pos
+showTokenError (TokenEqual pos) = showToken "=" pos
+showTokenError (TokenEquals pos) = showToken "==" pos
+showTokenError (TokenDiff pos) = showToken "!=" pos
+showTokenError (TokenGt pos) = showToken ">" pos
+showTokenError (TokenGtEq pos) = showToken ">=" pos
+showTokenError (TokenLess pos) = showToken "<" pos
+showTokenError (TokenLessEq pos) = showToken "<=" pos
+showTokenError (TokenLParen pos) = showToken "(" pos
+showTokenError (TokenRParen pos) = showToken ")" pos
+showTokenError (TokenLBrace pos) = showToken "{" pos
+showTokenError (TokenRBrace pos) = showToken "}" pos
+showTokenError (TokenLBracket pos) = showToken "[" pos
+showTokenError (TokenRBracket pos) = showToken "]" pos
+showTokenError (TokenComma pos) = showToken "," pos
+showTokenError (TokenNewline pos) = showToken "\\n" pos
+showTokenError (TokenInt val pos) = showToken (show val) pos
+showTokenError (TokenFloat val pos) = showToken (show val) pos
+showTokenError (TokenSymbol val pos) = showToken (show val) pos
+
+showToken :: String -> AlexPosn -> String
+showToken tokenName (AlexPn cp l c) = "\"" ++ tokenName ++ "\" at line " ++ show l ++ " and column "++ show c ++ "."
+
+
+alex_action_3 =  \pos s -> TokenFn pos 
+alex_action_4 =  \pos s -> TokenTrue pos 
+alex_action_5 =  \pos s -> TokenFalse pos 
+alex_action_6 =  \pos s -> TokenExtern pos 
+alex_action_7 =  \pos s -> TokenAdd pos 
+alex_action_8 =  \pos s -> TokenSub pos 
+alex_action_9 =  \pos s -> TokenDiv pos 
+alex_action_10 =  \pos s -> TokenMul pos 
+alex_action_11 =  \pos s -> TokenEqual pos 
+alex_action_12 =  \pos s -> TokenEquals pos 
+alex_action_13 =  \pos s -> TokenDiff pos 
+alex_action_14 =  \pos s -> TokenGt pos 
+alex_action_15 =  \pos s -> TokenGtEq pos 
+alex_action_16 =  \pos s -> TokenLess pos 
+alex_action_17 =  \pos s -> TokenLessEq pos 
+alex_action_18 =  \pos s -> TokenSymbol s pos 
+alex_action_19 =  \pos s -> TokenInt (read s) pos 
+alex_action_20 =  \pos s -> TokenFloat (read s) pos 
+alex_action_21 =  \pos s -> TokenLParen pos 
+alex_action_22 =  \pos s -> TokenRParen pos 
+alex_action_23 =  \pos s -> TokenLBrace pos 
+alex_action_24 =  \pos s -> TokenRBrace pos 
+alex_action_25 =  \pos s -> TokenLBracket pos 
+alex_action_26 =  \pos s -> TokenRBracket pos 
+alex_action_27 =  \pos s -> TokenNewline pos 
+alex_action_28 =  \pos s -> TokenComma pos 
+alex_action_29 =  \pos s -> TokenNot pos 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE
