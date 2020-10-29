@@ -2,6 +2,7 @@ module Main where
 import Syntax
 import Parser
 import System.IO
+import Control.Monad.Except
 
 main :: IO ()
 main = do 
@@ -17,10 +18,20 @@ processInput = do
         putStrLn "\n\nBye! :-)"
 
 processLine:: String -> IO ()
-processLine line = putStrLn $ case parseExpr line of
-        Right expr -> formatText $ show expr
-        Left error -> formatText error
-    where formatText str = "\n=>   " ++ str ++ "\n"
+processLine line = do 
+    processLineResult $ parseTokens line
+    processLineResult $ parseExpr line 
+
+    where 
+        formatText:: String -> String
+        formatText str = "\n=>   " ++ str ++ "\n"
+
+        processLineResult :: Show a => Either String a -> IO ()
+        processLineResult result = putStrLn $ do
+            case result of
+                Right succ -> formatText $ show succ
+                Left error -> formatText error
+
 
 promptLine:: String -> IO String
 promptLine header = do
