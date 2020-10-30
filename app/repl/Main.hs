@@ -1,6 +1,7 @@
 module Main where
 import Syntax
 import Parser
+import CompilerError
 import System.IO
 import Control.Monad.Except
 
@@ -19,18 +20,18 @@ processInput = do
 
 processLine:: String -> IO ()
 processLine line = do 
-    processLineResult $ parseTokens line
+    -- processLineResult $ parseTokens line
     processLineResult $ parseExpr line 
 
     where 
         formatText:: String -> String
         formatText str = "\n=>   " ++ str ++ "\n"
 
-        processLineResult :: Show a => Either String a -> IO ()
+        processLineResult :: Show a => Either CompilerError a -> IO ()
         processLineResult result = putStrLn $ do
             case result of
                 Right succ -> formatText $ show succ
-                Left error -> formatText error
+                Left error -> formatText $ msg error
 
 
 promptLine:: String -> IO String

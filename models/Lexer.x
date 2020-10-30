@@ -1,7 +1,8 @@
 {
-module Lexer(Token(..), scanTokens, showTokenError) where
+module Lexer(Token(..), scanTokens, showTokenError, getTokenPosition) where
 import Syntax
 import Control.Monad.Except
+import CompilerError
 }
 
 %wrapper "posn"
@@ -19,73 +20,79 @@ tokens :-
 	"/*".*"*/"	; -- multiline coments
 
 	-- Syntax 
-	fn 							{ \pos s -> TokenFn pos }
-	true						{ \pos s -> TokenTrue pos }
-	false						{ \pos s -> TokenFalse pos }
-	extern						{ \pos s -> TokenExtern pos }
-	\+							{ \pos s -> TokenAdd pos }
-	\-							{ \pos s -> TokenSub pos }
-	\/							{ \pos s -> TokenDiv pos }
-	\*							{ \pos s -> TokenMul pos }
-	\=							{ \pos s -> TokenEqual pos }
-	\=\=						{ \pos s -> TokenEquals pos }
-    \!\=						{ \pos s -> TokenDiff pos }
-    \>                          { \pos s -> TokenGt pos }
-    \>\=                        { \pos s -> TokenGtEq pos }
-    \<                          { \pos s -> TokenLess pos }
-    \<\=                        { \pos s -> TokenLessEq pos }
-	$alpha [$alpha $digit \_]*	{ \pos s -> TokenSymbol s pos }
-	$digit+						{ \pos s -> TokenInt (read s) pos }
-	$digit\.digit+				{ \pos s -> TokenFloat (read s) pos }
-	\(							{ \pos s -> TokenLParen pos }
-	\)							{ \pos s -> TokenRParen pos }
-	\{							{ \pos s -> TokenLBrace pos }
-	\}							{ \pos s -> TokenRBrace pos }
-	\[							{ \pos s -> TokenLBracket pos }
-	\]							{ \pos s -> TokenRBracket pos }
-	\r?\n 					    { \pos s -> TokenNewline pos }
-	\, 							{ \pos s -> TokenComma pos }
-    not                         { \pos s -> TokenNot pos }
+	fn 							{ \pos s -> TokenFn (alexPosnToPosition pos)}
+	true						{ \pos s -> TokenTrue (alexPosnToPosition pos)}
+	false						{ \pos s -> TokenFalse (alexPosnToPosition pos)}
+	extern						{ \pos s -> TokenExtern (alexPosnToPosition pos)}
+	\+							{ \pos s -> TokenAdd (alexPosnToPosition pos)}
+	\-							{ \pos s -> TokenSub (alexPosnToPosition pos)}
+	\/							{ \pos s -> TokenDiv (alexPosnToPosition pos)}
+	\*							{ \pos s -> TokenMul (alexPosnToPosition pos)}
+	\=							{ \pos s -> TokenEqual (alexPosnToPosition pos)}
+	\=\=						{ \pos s -> TokenEquals (alexPosnToPosition pos)}
+    \!\=						{ \pos s -> TokenDiff (alexPosnToPosition pos)}
+    \>                          { \pos s -> TokenGt (alexPosnToPosition pos)}
+    \>\=                        { \pos s -> TokenGtEq (alexPosnToPosition pos)}
+    \<                          { \pos s -> TokenLess (alexPosnToPosition pos)}
+    \<\=                        { \pos s -> TokenLessEq (alexPosnToPosition pos)}
+	$alpha [$alpha $digit \_]*	{ \pos s -> TokenSymbol s (alexPosnToPosition pos)}
+    $digit+ ('.' digit+)?       { \pos s -> let nps = alexPosnToPosition pos; processNumber str = case str of 
+                                                    "" -> TokenInt (read s) nps
+                                                    (x:xs) -> if x == '.' then 
+                                                                (TokenFloat (read s) nps) 
+                                                              else processNumber xs 
+                                                in processNumber s }
+	\(							{ \pos s -> TokenLParen (alexPosnToPosition pos)}
+	\)							{ \pos s -> TokenRParen (alexPosnToPosition pos)}
+	\{							{ \pos s -> TokenLBrace (alexPosnToPosition pos)}
+	\}							{ \pos s -> TokenRBrace (alexPosnToPosition pos)}
+	\[							{ \pos s -> TokenLBracket (alexPosnToPosition pos)}
+	\]							{ \pos s -> TokenRBracket (alexPosnToPosition pos)}
+	\r?\n 					    { \pos s -> TokenNewline (alexPosnToPosition pos)}
+	\, 							{ \pos s -> TokenComma (alexPosnToPosition pos)}
+    not                         { \pos s -> TokenNot (alexPosnToPosition pos)}
 
 {
 data Token 
-    = TokenFn AlexPosn
-    | TokenFalse AlexPosn
-    | TokenTrue AlexPosn
-    | TokenExtern AlexPosn
-    | TokenAdd AlexPosn
-    | TokenSub AlexPosn
-    | TokenMul AlexPosn
-    | TokenDiv AlexPosn
-    | TokenEqual AlexPosn
-    | TokenEquals AlexPosn
-    | TokenDiff AlexPosn
-    | TokenGt AlexPosn
-    | TokenGtEq AlexPosn
-    | TokenLess AlexPosn
-    | TokenLessEq AlexPosn
-    | TokenNot AlexPosn
-    | TokenSymbol String AlexPosn
-    | TokenInt Int AlexPosn
-    | TokenFloat Float AlexPosn
-    | TokenLParen AlexPosn
-    | TokenRParen AlexPosn
-    | TokenLBrace AlexPosn
-    | TokenRBrace AlexPosn
-    | TokenLBracket AlexPosn
-    | TokenRBracket AlexPosn
-    | TokenEOF AlexPosn
-    | TokenNewline AlexPosn
-    | TokenComma AlexPosn
+    = TokenFn Position
+    | TokenFalse Position
+    | TokenTrue Position
+    | TokenExtern Position
+    | TokenAdd Position
+    | TokenSub Position
+    | TokenMul Position
+    | TokenDiv Position
+    | TokenEqual Position
+    | TokenEquals Position
+    | TokenDiff Position
+    | TokenGt Position
+    | TokenGtEq Position
+    | TokenLess Position
+    | TokenLessEq Position
+    | TokenNot Position
+    | TokenSymbol String Position
+    | TokenInt Int Position
+    | TokenFloat Float Position
+    | TokenLParen Position
+    | TokenRParen Position
+    | TokenLBrace Position
+    | TokenRBrace Position
+    | TokenLBracket Position
+    | TokenRBracket Position
+    | TokenEOF Position
+    | TokenNewline Position
+    | TokenComma Position
     deriving (Eq, Show)
 
-scanTokens :: String -> Except String [Token]
+scanTokens :: String -> Except CompilerError [Token]
 scanTokens str = go (alexStartPos, '\n', [], str) []
         where 
-            go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except String [Token]
+            go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except CompilerError [Token]
             go inp@(pos, _, _, str) tokens = case alexScan inp 0 of 
                 AlexEOF -> return tokens
-                AlexError ((AlexPn _ l c), _, _, _) -> throwError $ "lexical error in file at " ++ (show l) ++ " line, " ++ (show c) ++ " column"
+                AlexError (epos, tmp, _, _) -> throwError $ let newPos = alexPosnToPosition epos in Message { 
+                    msg = ("lexical error " ++ show tmp ++ " in file at " ++ show (line newPos) ++ " line, " ++ show (col newPos) ++ " column"), 
+                    pos = newPos }
                 AlexSkip newInput len -> go newInput tokens
                 AlexToken newInput len act -> go newInput ((act pos (take len str)):tokens)
 
@@ -116,9 +123,41 @@ showTokenError (TokenComma pos) = showToken "," pos
 showTokenError (TokenNewline pos) = showToken "\\n" pos
 showTokenError (TokenInt val pos) = showToken (show val) pos
 showTokenError (TokenFloat val pos) = showToken (show val) pos
-showTokenError (TokenSymbol val pos) = showToken (show val) pos
+showTokenError (TokenSymbol val pos) = showToken val pos
 
-showToken :: String -> AlexPosn -> String
-showToken tokenName (AlexPn cp l c) = "\"" ++ tokenName ++ "\" at line " ++ show l ++ " and column "++ show c ++ "."
+showToken :: String -> Position -> String
+showToken tokenName Nil = show tokenName
+showToken tokenName pos = show tokenName ++ " at line " ++ show (line pos) ++ " and column "++ show (col pos) ++ "."
 
+alexPosnToPosition :: AlexPosn -> Position
+alexPosnToPosition (AlexPn cp l c) = Pos { charPos = cp, line = l, col = c }
+
+getTokenPosition :: Token -> Position
+getTokenPosition (TokenFn pos)          = pos
+getTokenPosition (TokenFalse pos)       = pos
+getTokenPosition (TokenTrue pos)        = pos
+getTokenPosition (TokenExtern pos)      = pos
+getTokenPosition (TokenNot pos)         = pos
+getTokenPosition (TokenAdd pos)         = pos
+getTokenPosition (TokenSub pos)         = pos
+getTokenPosition (TokenMul pos)         = pos
+getTokenPosition (TokenDiv pos)         = pos
+getTokenPosition (TokenEqual pos)       = pos
+getTokenPosition (TokenEquals pos)      = pos
+getTokenPosition (TokenDiff pos)        = pos
+getTokenPosition (TokenGt pos)          = pos
+getTokenPosition (TokenGtEq pos)        = pos
+getTokenPosition (TokenLess pos)        = pos
+getTokenPosition (TokenLessEq pos)      = pos
+getTokenPosition (TokenLParen pos)      = pos
+getTokenPosition (TokenRParen pos)      = pos
+getTokenPosition (TokenLBrace pos)      = pos
+getTokenPosition (TokenRBrace pos)      = pos
+getTokenPosition (TokenLBracket pos)    = pos
+getTokenPosition (TokenRBracket pos)    = pos
+getTokenPosition (TokenComma pos)       = pos
+getTokenPosition (TokenNewline pos)     = pos
+getTokenPosition (TokenInt _ pos)       = pos
+getTokenPosition (TokenFloat _ pos)     = pos
+getTokenPosition (TokenSymbol _ pos)    = pos
 }

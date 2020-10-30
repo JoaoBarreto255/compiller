@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 87e3f66abc5803fcce617a63f85c2608f8492a56750df737f62a6b786b1d6695
+-- hash: 229c517336a20d0c33d327927fb2ad0327054b3d436335710bda3b29f58f31d2
 
 name:           compiler
 version:        0.1.0.0
@@ -27,6 +27,7 @@ source-repository head
 
 library
   exposed-modules:
+      CompilerError
       Lexer
       Lib
       Parser

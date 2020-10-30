@@ -6,12 +6,13 @@ module Parser(
 ) where
 import Lexer
 import Syntax
+import CompilerError
 
 import Control.Monad.Except
 }
 -- Lexer Structure
 %tokentype  { Token }
-%monad {Except String} { >>= } { return }
+%monad { Except CompilerError } { >>= } { return }
 %error { parseError }
 
 %name expr
@@ -121,16 +122,18 @@ PARAMLIST: BOOLEXPR ',' PARAMLIST   { let (x:xs) = $3 in ($1:x:xs) }
 
 
 {
-parseError :: [Token] -> Except String a
-parseError (l:ls) = throwError $ "Unexpected token: " ++ (showTokenError l)
-parseError [] = throwError "Unexpected end of input"
+parseError :: [Token] -> Except CompilerError a
+parseError (l:ls) = throwError $ Message {
+    msg = "Unexpected token: " ++ showTokenError l,
+    pos = getTokenPosition l }
+parseError [] = throwError $ Message { msg = "Unexpected end of input", pos = Nil }
 
-parseExpr :: String -> Either String Expr
+parseExpr :: String -> Either CompilerError Expr
 parseExpr input = runExcept $ do
   tokenStream <- scanTokens input
   expr $ reverse tokenStream
 
-parseTokens :: String -> Either String [Token]
+parseTokens :: String -> Either CompilerError [Token]
 parseTokens = runExcept . scanTokens
 }
     
