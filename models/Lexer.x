@@ -8,7 +8,7 @@ import CompilerError
 %wrapper "posn"
 
 $digit = [0-9]
-$hexaDigit = [0-9A-F]
+$hexaDigit = [0-9a-fA-F]
 $alpha = [a-zA-Z]
 
 tokens :- 
@@ -20,37 +20,33 @@ tokens :-
 	"/*".*"*/"	; -- multiline coments
 
 	-- Syntax 
-	fn 							{ \pos s -> TokenFn (alexPosnToPosition pos)}
-	true						{ \pos s -> TokenTrue (alexPosnToPosition pos)}
-	false						{ \pos s -> TokenFalse (alexPosnToPosition pos)}
-	extern						{ \pos s -> TokenExtern (alexPosnToPosition pos)}
-	\+							{ \pos s -> TokenAdd (alexPosnToPosition pos)}
-	\-							{ \pos s -> TokenSub (alexPosnToPosition pos)}
-	\/							{ \pos s -> TokenDiv (alexPosnToPosition pos)}
-	\*							{ \pos s -> TokenMul (alexPosnToPosition pos)}
-	\=							{ \pos s -> TokenEqual (alexPosnToPosition pos)}
-	\=\=						{ \pos s -> TokenEquals (alexPosnToPosition pos)}
-    \!\=						{ \pos s -> TokenDiff (alexPosnToPosition pos)}
-    \>                          { \pos s -> TokenGt (alexPosnToPosition pos)}
-    \>\=                        { \pos s -> TokenGtEq (alexPosnToPosition pos)}
-    \<                          { \pos s -> TokenLess (alexPosnToPosition pos)}
-    \<\=                        { \pos s -> TokenLessEq (alexPosnToPosition pos)}
-	$alpha [$alpha $digit \_]*	{ \pos s -> TokenSymbol s (alexPosnToPosition pos)}
-    $digit+ ('.' digit+)?       { \pos s -> let nps = alexPosnToPosition pos; processNumber str = case str of 
-                                                    "" -> TokenInt (read s) nps
-                                                    (x:xs) -> if x == '.' then 
-                                                                (TokenFloat (read s) nps) 
-                                                              else processNumber xs 
-                                                in processNumber s }
-	\(							{ \pos s -> TokenLParen (alexPosnToPosition pos)}
-	\)							{ \pos s -> TokenRParen (alexPosnToPosition pos)}
-	\{							{ \pos s -> TokenLBrace (alexPosnToPosition pos)}
-	\}							{ \pos s -> TokenRBrace (alexPosnToPosition pos)}
-	\[							{ \pos s -> TokenLBracket (alexPosnToPosition pos)}
-	\]							{ \pos s -> TokenRBracket (alexPosnToPosition pos)}
-	\r?\n 					    { \pos s -> TokenNewline (alexPosnToPosition pos)}
-	\, 							{ \pos s -> TokenComma (alexPosnToPosition pos)}
-    not                         { \pos s -> TokenNot (alexPosnToPosition pos)}
+	fn 							                       { \pos s -> TokenFn (alexPosnToPosition pos) }
+	true						                       { \pos s -> TokenTrue (alexPosnToPosition pos) }
+	false						                       { \pos s -> TokenFalse (alexPosnToPosition pos) }
+	extern						                       { \pos s -> TokenExtern (alexPosnToPosition pos) }
+	\+							                       { \pos s -> TokenAdd (alexPosnToPosition pos) }
+	\-							                       { \pos s -> TokenSub (alexPosnToPosition pos) }
+	\/							                       { \pos s -> TokenDiv (alexPosnToPosition pos) }
+	\*							                       { \pos s -> TokenMul (alexPosnToPosition pos) }
+	\=							                       { \pos s -> TokenEqual (alexPosnToPosition pos) }
+	\=\=						                       { \pos s -> TokenEquals (alexPosnToPosition pos) }
+    \!\=						                       { \pos s -> TokenDiff (alexPosnToPosition pos) }
+    \>                                                 { \pos s -> TokenGt (alexPosnToPosition pos) }
+    \>\=                                               { \pos s -> TokenGtEq (alexPosnToPosition pos) }
+    \<                                                 { \pos s -> TokenLess (alexPosnToPosition pos) }
+    \<\=                                               { \pos s -> TokenLessEq (alexPosnToPosition pos) }
+    ($digit+|[0] [xX] $hexaDigit+)                     { \pos s -> TokenInt s (alexPosnToPosition pos) }
+	$alpha [$alpha $digit \_]*	                       { \pos s -> TokenSymbol s (alexPosnToPosition pos) }
+    $digit+ (\. $digit+([eE] \-? $digit+)?)?           { \pos s -> TokenFloat s (alexPosnToPosition pos) }
+	\(							                       { \pos s -> TokenLParen (alexPosnToPosition pos) }
+	\)							                       { \pos s -> TokenRParen (alexPosnToPosition pos) }
+	\{							                       { \pos s -> TokenLBrace (alexPosnToPosition pos) }
+	\}							                       { \pos s -> TokenRBrace (alexPosnToPosition pos) }
+	\[							                       { \pos s -> TokenLBracket (alexPosnToPosition pos) }
+	\]							                       { \pos s -> TokenRBracket (alexPosnToPosition pos) }
+	\r?\n 					                           { \pos s -> TokenNewline (alexPosnToPosition pos) }
+	\, 							                       { \pos s -> TokenComma (alexPosnToPosition pos) }
+    not                                                { \pos s -> TokenNot (alexPosnToPosition pos) }
 
 {
 data Token 
@@ -71,8 +67,8 @@ data Token
     | TokenLessEq Position
     | TokenNot Position
     | TokenSymbol String Position
-    | TokenInt Int Position
-    | TokenFloat Float Position
+    | TokenInt String Position
+    | TokenFloat String Position
     | TokenLParen Position
     | TokenRParen Position
     | TokenLBrace Position
@@ -90,8 +86,8 @@ scanTokens str = go (alexStartPos, '\n', [], str) []
             go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except CompilerError [Token]
             go inp@(pos, _, _, str) tokens = case alexScan inp 0 of 
                 AlexEOF -> return tokens
-                AlexError (epos, tmp, _, _) -> throwError $ let newPos = alexPosnToPosition epos in Message { 
-                    msg = ("lexical error " ++ show tmp ++ " in file at " ++ show (line newPos) ++ " line, " ++ show (col newPos) ++ " column"), 
+                AlexError (epos, _, _, tmp) -> throwError $ let newPos = alexPosnToPosition epos in Message { 
+                    msg = ("lexical error " ++ show (head tmp) ++ " in file at " ++ show (line newPos) ++ " line, " ++ show (col newPos) ++ " column"), 
                     pos = newPos }
                 AlexSkip newInput len -> go newInput tokens
                 AlexToken newInput len act -> go newInput ((act pos (take len str)):tokens)
