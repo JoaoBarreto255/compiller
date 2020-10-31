@@ -2,8 +2,8 @@ module Syntax where
     type Name = String
     
     data Expr 
-        = Float Float
-        | Integer Int
+        = Float String
+        | Integer String
         | BinOp Op Expr Expr
         | Negate Expr
         | Not Expr

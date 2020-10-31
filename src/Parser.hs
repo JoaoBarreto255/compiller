@@ -695,13 +695,13 @@ happyReduction_17 _ _  = notHappyAtAll
 happyReduce_18 = happySpecReduce_1  11 happyReduction_18
 happyReduction_18 _
 	 =  HappyAbsSyn4
-		 (Integer 1
+		 (Integer "1"
 	)
 
 happyReduce_19 = happySpecReduce_1  11 happyReduction_19
 happyReduction_19 _
 	 =  HappyAbsSyn4
-		 (Integer 0
+		 (Integer "0"
 	)
 
 happyReduce_20 = happySpecReduce_1  11 happyReduction_20

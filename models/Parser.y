@@ -89,8 +89,8 @@ BOOLEXPR:: { Expr }
 BOOLEXPR: CMPEXPR '==' CMPEXPR      { BinOp Equals $1 $3 }
         | CMPEXPR '!=' CMPEXPR      { BinOp Difference $1 $3 }
         | not BOOLEXPR              { Not $2 }
-        | true                      { Integer 1 }
-        | false                     { Integer 0 }
+        | true                      { Integer "1" }
+        | false                     { Integer "0" }
         | CMPEXPR                   { $1 }
 
 CMPEXPR:: { Expr }

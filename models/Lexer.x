@@ -20,33 +20,33 @@ tokens :-
 	"/*".*"*/"	; -- multiline coments
 
 	-- Syntax 
-	fn 							                       { \pos s -> TokenFn (alexPosnToPosition pos) }
-	true						                       { \pos s -> TokenTrue (alexPosnToPosition pos) }
-	false						                       { \pos s -> TokenFalse (alexPosnToPosition pos) }
-	extern						                       { \pos s -> TokenExtern (alexPosnToPosition pos) }
-	\+							                       { \pos s -> TokenAdd (alexPosnToPosition pos) }
-	\-							                       { \pos s -> TokenSub (alexPosnToPosition pos) }
-	\/							                       { \pos s -> TokenDiv (alexPosnToPosition pos) }
-	\*							                       { \pos s -> TokenMul (alexPosnToPosition pos) }
-	\=							                       { \pos s -> TokenEqual (alexPosnToPosition pos) }
-	\=\=						                       { \pos s -> TokenEquals (alexPosnToPosition pos) }
-    \!\=						                       { \pos s -> TokenDiff (alexPosnToPosition pos) }
-    \>                                                 { \pos s -> TokenGt (alexPosnToPosition pos) }
-    \>\=                                               { \pos s -> TokenGtEq (alexPosnToPosition pos) }
-    \<                                                 { \pos s -> TokenLess (alexPosnToPosition pos) }
-    \<\=                                               { \pos s -> TokenLessEq (alexPosnToPosition pos) }
-    ($digit+|[0] [xX] $hexaDigit+)                     { \pos s -> TokenInt s (alexPosnToPosition pos) }
-	$alpha [$alpha $digit \_]*	                       { \pos s -> TokenSymbol s (alexPosnToPosition pos) }
-    $digit+ (\. $digit+([eE] \-? $digit+)?)?           { \pos s -> TokenFloat s (alexPosnToPosition pos) }
-	\(							                       { \pos s -> TokenLParen (alexPosnToPosition pos) }
-	\)							                       { \pos s -> TokenRParen (alexPosnToPosition pos) }
-	\{							                       { \pos s -> TokenLBrace (alexPosnToPosition pos) }
-	\}							                       { \pos s -> TokenRBrace (alexPosnToPosition pos) }
-	\[							                       { \pos s -> TokenLBracket (alexPosnToPosition pos) }
-	\]							                       { \pos s -> TokenRBracket (alexPosnToPosition pos) }
-	\r?\n 					                           { \pos s -> TokenNewline (alexPosnToPosition pos) }
-	\, 							                       { \pos s -> TokenComma (alexPosnToPosition pos) }
-    not                                                { \pos s -> TokenNot (alexPosnToPosition pos) }
+	fn 							                       { \pos s -> TokenFn (transformPosition pos s) }
+	true						                       { \pos s -> TokenTrue (transformPosition pos s) }
+	false						                       { \pos s -> TokenFalse (transformPosition pos s) }
+	extern						                       { \pos s -> TokenExtern (transformPosition pos s) }
+	\+							                       { \pos s -> TokenAdd (transformPosition pos s) }
+	\-							                       { \pos s -> TokenSub (transformPosition pos s) }
+	\/							                       { \pos s -> TokenDiv (transformPosition pos s) }
+	\*							                       { \pos s -> TokenMul (transformPosition pos s) }
+	\=							                       { \pos s -> TokenEqual (transformPosition pos s) }
+	\=\=						                       { \pos s -> TokenEquals (transformPosition pos s) }
+    \!\=						                       { \pos s -> TokenDiff (transformPosition pos s) }
+    \>                                                 { \pos s -> TokenGt (transformPosition pos s) }
+    \>\=                                               { \pos s -> TokenGtEq (transformPosition pos s) }
+    \<                                                 { \pos s -> TokenLess (transformPosition pos s) }
+    \<\=                                               { \pos s -> TokenLessEq (transformPosition pos s) }
+    ($digit+|[0] [xX] $hexaDigit+)                     { \pos s -> TokenInt s (transformPosition pos s) }
+	$alpha [$alpha $digit \_]*	                       { \pos s -> TokenSymbol s (transformPosition pos s) }
+    $digit+ (\. $digit+([eE] \-? $digit+)?)?           { \pos s -> TokenFloat s (transformPosition pos s) }
+	\(							                       { \pos s -> TokenLParen (transformPosition pos s) }
+	\)							                       { \pos s -> TokenRParen (transformPosition pos s) }
+	\{							                       { \pos s -> TokenLBrace (transformPosition pos s) }
+	\}							                       { \pos s -> TokenRBrace (transformPosition pos s) }
+	\[							                       { \pos s -> TokenLBracket (transformPosition pos s) }
+	\]							                       { \pos s -> TokenRBracket (transformPosition pos s) }
+	\r?\n 					                           { \pos s -> TokenNewline (transformPosition pos s) }
+	\, 							                       { \pos s -> TokenComma (transformPosition pos s) }
+    not                                                { \pos s -> TokenNot (transformPosition pos s) }
 
 {
 data Token 
@@ -86,7 +86,7 @@ scanTokens str = go (alexStartPos, '\n', [], str) []
             go:: (AlexPosn, Char, [Byte], String) -> [Token] -> Except CompilerError [Token]
             go inp@(pos, _, _, str) tokens = case alexScan inp 0 of 
                 AlexEOF -> return tokens
-                AlexError (epos, _, _, tmp) -> throwError $ let newPos = alexPosnToPosition epos in Message { 
+                AlexError (epos, _, _, tmp) -> throwError $ let newPos = transformPosition epos "" in Message { 
                     msg = ("lexical error " ++ show (head tmp) ++ " in file at " ++ show (line newPos) ++ " line, " ++ show (col newPos) ++ " column"), 
                     pos = newPos }
                 AlexSkip newInput len -> go newInput tokens
@@ -125,8 +125,8 @@ showToken :: String -> Position -> String
 showToken tokenName Nil = show tokenName
 showToken tokenName pos = show tokenName ++ " at line " ++ show (line pos) ++ " and column "++ show (col pos) ++ "."
 
-alexPosnToPosition :: AlexPosn -> Position
-alexPosnToPosition (AlexPn cp l c) = Pos { charPos = cp, line = l, col = c }
+transformPosition :: AlexPosn -> String -> Position
+transformPosition (AlexPn cp l c) tkStr = Pos { charPos = cp, line = l, col = c, len = length tkStr }
 
 getTokenPosition :: Token -> Position
 getTokenPosition (TokenFn pos)          = pos
