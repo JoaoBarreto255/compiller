@@ -1,4 +1,4 @@
-module CompilerError (CompilerError(..), Position(..), createEOFPosition) where
+module CompilerError (CompilerError(..), Position(..), createEOFPosition, showInputError) where
 
     data CompilerError 
         = Message { msg::String, pos::Position }
@@ -37,7 +37,7 @@ module CompilerError (CompilerError(..), Position(..), createEOFPosition) where
                                   | otherwise = '\n':x:xs
 
               processInput :: String -> Position -> (Int, Int, Int, [String]) -> [String]
-              processInput [] pos (_,_,_,stack) = take 6 stack
+              processInput [] _ (_,_,_,stack) = h:t
                     where h = appendSlashN $ head stack
                           t = take 5 $ tail stack
                           

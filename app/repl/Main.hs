@@ -21,17 +21,17 @@ processInput = do
 processLine:: String -> IO ()
 processLine line = do 
     -- processLineResult $ parseTokens line
-    processLineResult $ parseExpr line 
+    processLineResult line $ parseExpr line 
 
     where 
         formatText:: String -> String
         formatText str = "\n=>   " ++ str ++ "\n"
 
-        processLineResult :: Show a => Either CompilerError a -> IO ()
-        processLineResult result = putStrLn $ do
+        processLineResult :: Show a => String -> Either CompilerError a -> IO ()
+        processLineResult line result = putStrLn $ do
             case result of
                 Right succ -> formatText $ show succ
-                Left error -> formatText $ msg error
+                Left error -> formatText $ showInputError line (pos error) ++ msg error
 
 
 promptLine:: String -> IO String
