@@ -5,5 +5,6 @@ image:
 
 vscode:
   extensions:
-    - justusadam.language-haskell@2.6.0:CvYnp3YmQPTuto0m1di+1A==
     - hoovercj.haskell-linter@0.0.6:VpJluXvOyr9Iw7TIKg2Oyg==
+    - justusadam.language-haskell@3.3.0:uqgpHstOoamig+7LyFNNVw==
+    - haskell.haskell@1.1.0:Wt1BvkxTWaeCQD86YIN0fw==
